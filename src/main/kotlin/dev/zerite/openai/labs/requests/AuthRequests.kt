@@ -1,6 +1,6 @@
 package dev.zerite.openai.labs.requests
 
-import dev.zerite.openai.labs.OpenAILabs
+import dev.zerite.openai.labs.OpenAILabsAuth
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -9,7 +9,7 @@ data class LabsAccessTokenRequest(
     val code: String,
     @SerialName("code_verifier") val codeVerifier: String,
     @SerialName("redirect_uri") val redirectUri: String = "https://labs.openai.com/auth/callback",
-    @SerialName("client_id") val clientId: String = OpenAILabs.CLIENT_ID,
+    @SerialName("client_id") val clientId: String = OpenAILabsAuth.CLIENT_ID,
     @SerialName("grant_type") val grantType: String = "authorization_code"
 )
 
@@ -22,3 +22,18 @@ data class LabsAccessTokenResponse(
     val scope: String,
     @SerialName("token_type") val tokenType: String
 )
+
+@Serializable
+data class LabsLoginResponse(
+    val user: User
+) {
+    @Serializable
+    data class User(
+        val session: Session
+    )
+
+    @Serializable
+    data class Session(
+        @SerialName("sensitive_id") val sensitiveId: String,
+    )
+}

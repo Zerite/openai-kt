@@ -2,6 +2,7 @@ package dev.zerite.openai.labs
 
 import dev.zerite.openai.labs.requests.LabsAccessTokenRequest
 import dev.zerite.openai.labs.requests.LabsAccessTokenResponse
+import dev.zerite.openai.labs.requests.LabsLoginResponse
 import dev.zerite.openai.util.nextString
 import dev.zerite.openai.util.sha256
 import dev.zerite.openai.util.toBase64
@@ -30,7 +31,7 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import kotlin.random.Random
 
-object OpenAILabs {
+object OpenAILabsAuth {
 
     private const val USER_AGENT =
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36"
@@ -166,6 +167,32 @@ object OpenAILabs {
 
         // Return the access token
         return tokenReq.body()
+    }
+
+    /**
+     * Creates a new session for the given labs token.
+     *
+     * @param token The labs token to create a session for.
+     * @return The session response.
+     */
+    suspend fun createSession(token: LabsAccessTokenResponse): LabsLoginResponse {
+        // Create a temporary client
+        val client = HttpClient(OkHttp) {
+            install(ContentNegotiation) {
+                json(Json {
+                    ignoreUnknownKeys = true
+                    encodeDefaults = true
+                })
+            }
+        }
+
+        // Send a request to create a session
+        val sessionReq = client.post("https://labs.openai.com/api/labs/auth/login") {
+            header("Authorization", "Bearer ${token.accessToken}")
+        }
+
+        // Return the session
+        return sessionReq.body()
     }
 
     /**
